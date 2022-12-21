@@ -3,8 +3,7 @@ const cors = require('cors')
 const app = express()
 const loginRouter = require('./controllers/login')
 const mongoose = require('mongoose')
-const url = `mongodb+srv://root:root@cluster0.iz4io7v.mongodb.net/noteApp?retryWrites=true&w=majority`
-mongoose.connect(url)
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => {
   console.log('CONEECTED')
 })
