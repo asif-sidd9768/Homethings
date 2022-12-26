@@ -4,6 +4,11 @@ const userSchema = new mongoose.Schema({
   username: String,
   name: String,
   passwordHash: String,
+  birthDay: Date,
+  gadgets: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Gadget'
+  }]
 })
 
 userSchema.set('toJSON', {
