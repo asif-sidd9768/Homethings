@@ -8,6 +8,13 @@ usersRouter.get('/', async (req, res) => {
   res.json(users)
 })
 
+// usersRouter.post('/bDay', async (req, res) => {
+//   const { birthday } = req.body
+//   user.birthDay = birthday
+//   user.save()
+//   res.status(201).json(user)
+// })
+
 usersRouter.post('/', async (req, res) => {
   const { username, name, password } = req.body
 
