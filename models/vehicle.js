@@ -4,24 +4,24 @@ const insuranceSchema = new mongoose.Schema({
   startDate: Date,
   endDate: Date,
   company: String
-})
+}, { _id : false })
 
 const pucSchema = new mongoose.Schema({
   startDate: Date,
   endDate: Date
-})
+}, { _id : false })
 
 const servicesSchema = new mongoose.Schema({
   lastServiceDate: Date,
   lastServiceKms: Number,
   nextServiceKms: Number
-})
+}, { _id : false })
 
 const warrantyDataSchema = mongoose.Schema({
   insurance: insuranceSchema,
   Puc: pucSchema,
   services: servicesSchema
-})
+}, { _id : false })
 
 const vehicleSchema = new mongoose.Schema({
     name: String,

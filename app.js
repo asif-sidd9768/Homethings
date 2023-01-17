@@ -6,6 +6,9 @@ const mongoose = require('mongoose')
 const usersRouter = require('./controllers/users')
 const gadgetsRouter = require('./controllers/gadgets')
 const vehiclesRouter = require('./controllers/vehicles')
+const eventsRouter = require('./controllers/events')
+const servicesRouter = require('./controllers/services')
+const funRouter = require('./controllers/fun')
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   console.log('CONEECTED TO MONGOOSE === ')
 })
@@ -24,5 +27,8 @@ app.use('/api/users', usersRouter)
 app.use('/api/login', loginRouter)
 app.use('/api/gadgets', gadgetsRouter)
 app.use('/api/vehicles', vehiclesRouter)
+app.use('/api/events', eventsRouter)
+app.use('/api/services', servicesRouter)
+app.use('/api/fun', funRouter)
 
 module.exports = app

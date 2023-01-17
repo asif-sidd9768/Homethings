@@ -16,7 +16,7 @@ usersRouter.get('/', async (req, res) => {
 // })
 
 usersRouter.post('/', async (req, res) => {
-  const { username, name, password } = req.body
+  const { username, name, password, birthDay } = req.body
 
   const existingUser = await User.findOne({ username })
   if(existingUser) {
@@ -31,6 +31,7 @@ usersRouter.post('/', async (req, res) => {
   const user = new User({
     username,
     name,
+    birthDay,
     passwordHash,
   })
 

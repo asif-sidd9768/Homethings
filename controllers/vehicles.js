@@ -1,9 +1,12 @@
 const vehiclesRouter = require('express').Router()
-const Vehicle = require('../models/vehicles')
+const Vehicle = require('../models/vehicle')
 const User = require('../models/user')
 
 vehiclesRouter.get('/', async (req, res) => {
   const data = await Vehicle.find({})
+  const data1 = await Vehicle.find({}).select("-_id -__v").exec((err, data) => {
+    console.log(data)
+  })
   let vehicles = {
     cars: [],
     bikes: []
