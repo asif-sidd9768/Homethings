@@ -5,7 +5,7 @@ nGRouter.get('/', async (req, res) => {
   // Fetch latest videos from YouTube channel
   const response = await fetch(API_URL)
   const data = await response.json()
-  res.send(data)
+  res.send("hello")
 })
 
 module.exports = nGRouter
