@@ -31,6 +31,6 @@ app.use('/api/vehicles', vehiclesRouter)
 app.use('/api/events', eventsRouter)
 app.use('/api/services', servicesRouter)
 app.use('/api/fun', funRouter)
-app.use('/api/next-gadget', nGRouter)
+app.use('/api/nextGadget', nGRouter)
 
 module.exports = app
