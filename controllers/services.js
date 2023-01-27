@@ -5,8 +5,12 @@ const _ = require('lodash')
 servicesRouter.get('/', async(req, res) => {
   const services = await Service.find({})
 
-  const categorized = _.groupBy(services, 'type');
-  console.log(categorized)
+  //const categorized = _.groupBy(services, 'type');
+  const categorized  = _.chain(services)
+                          .groupBy("type")
+                          .map((value, key) => ({ title: key, users: value }))
+                          .value()
+  // console.log(categorized)
   res.send(categorized)
 })
 
