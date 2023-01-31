@@ -5,7 +5,7 @@ const User = require('../models/user')
 gadgetsRouter.get('/', async (req, res) => {
   const gadgets = await Gadget
     .find({})
-  res.send('gadgets')
+  res.send(gadgets)
 })
 
 gadgetsRouter.post('/', async (req, res) => {
@@ -16,9 +16,9 @@ gadgetsRouter.post('/', async (req, res) => {
     warranty,
     warrantyTill
   })
-
-  gadget.save()
+  const user = await User.findById()
   user.gadgets.push(gadget)
+  gadget.save()
   user.save()
   // console.log('gadget == ', gadget)
   // console.log('user=== ', user)
