@@ -10,8 +10,9 @@ funRouter.post('/', async (req, res) => {
 })
 
 funRouter.post('/question', async(req, res) => {
-  const { data } = req.body
-  const question = `generate a ${data.data} question`
+  const { data, questions } = req.body
+  const isQuestions = (questions && Object.keys(questions).length !== 0)
+  const question = `generate a ${data} question ${(isQuestions ? `and question should not be from the following questions: ${Object.values(questions)}` : '' )}`
   const response = await generateQuestion(question)
   res.send(response)
 })
