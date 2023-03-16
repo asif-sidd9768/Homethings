@@ -11,7 +11,7 @@ funRouter.post('/', async (req, res) => {
 
 funRouter.post('/question', async(req, res) => {
   const { data } = req.body
-  const question = `generate a ${data} question`
+  const question = `generate a ${data.data} question`
   const response = await generateQuestion(question)
   res.send(response)
 })
