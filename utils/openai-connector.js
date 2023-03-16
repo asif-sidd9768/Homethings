@@ -20,6 +20,9 @@ const generate = async (input) => {
 
 const generateQuestion = async (input) => {
   try{
+    console.log('====================================');
+    console.log('input ==== ', input);
+    console.log('====================================');
     const { Configuration, OpenAIApi } = require("openai");
     const configuration = new Configuration({
     apiKey: process.env.OPEN_AI_KEY,

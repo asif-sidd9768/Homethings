@@ -11,8 +11,17 @@ funRouter.post('/', async (req, res) => {
 
 funRouter.post('/question', async(req, res) => {
   const { data, questions } = req.body
-  const isQuestions = (questions && Object.keys(questions).length !== 0)
-  const question = `generate a ${data} question ${(isQuestions ? `and question should not be from the following questions: ${Object.values(questions)}` : '' )}`
+  console.log('====================================');
+  console.log('data==== ', data);
+  console.log('questions === ', questions)
+  console.log('====================================');
+  let question;
+  if(questions && Object.keys(questions).length !== 0){
+    question = `generate a ${data} question, and question should not be from the following questions: ${Object.values(questions)}`
+  }else{
+    question = `generate a ${data} question`
+  }
+  
   const response = await generateQuestion(question)
   res.send(response)
 })
