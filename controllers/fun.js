@@ -15,10 +15,10 @@ funRouter.post('/question', async(req, res) => {
   console.log('data==== ', data);
   console.log('questions === ', questions)
   console.log('====================================');
-  const questionsArray = Object.values(questions).filter(v => v != "")
+  const questionsArray = Object.values(questions).filter(v => v != "").map(v => v.trim())
   let question;
   if(questions && Object.keys(questions).length !== 0){
-    question = `generate a ${data} question, and question should not be from the following questions: ${questionsArray}`
+    question = `generate a ${data} question, and question should not be from the following questions: [ ${questionsArray} ]`
   }else{
     question = `generate a ${data} question`
   }
