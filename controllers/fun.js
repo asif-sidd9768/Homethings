@@ -31,7 +31,7 @@ funRouter.post('/answer', async(req, res) => {
   const { question, answer } = req.body
   const sentence = `Analyze the below answer for question "${question}":\n
   ${answer} \n\n
-  Mark out of 10: answer should be in a format = (1. mark out of 10 and in the next line 2. reasoning)`
+  Mark out of 10: answer should be in a format = ([[mark/10]] - [[reasoning]])`
   console.log(sentence)
   const response = await generateQuestion(sentence)
   res.send(response)
