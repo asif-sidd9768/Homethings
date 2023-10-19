@@ -7,33 +7,22 @@ const schedule = require('node-schedule');
 // Function to send birthday notifications
 const sendBirthdayNotifications = async () => {
   console.log("SCHEDULED THE JOB")
-  const currentDate = new Date();
+  // const currentDate = new Date();
 
   // Find active users whose birthday is today
-  const activeUsers = await ActiveUser.find({
-    birthday: {
-      $gte: currentDate,
-      $lt: new Date(currentDate.getTime() + 24 * 60 * 60 * 1000) // Check for birthdays in the next 24 hours
-    }
-  });
-
-  if (activeUsers.length === 0) {
-    console.log("No birthdays today");
-    return;
-  }
-
+  const activeUsers = await ActiveUser.find({}) 
+  
   let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
   let messages = [];
   for (let activeUser of activeUsers) {
-    // Construct a message
+    // Construct a message (see https://docs.expo.io/push-notifications/sending-notifications/)
     messages.push({
       to: activeUser.deviceToken,
       sound: 'default',
-      body: `Happy Birthday, ${activeUser.name}! 🎉`,
-      data: { birthdayNotification: true },
-    });
+      body: 'Someone\'s missing u',
+      data: { withSome: 'data' },
+    })
   }
-
   let chunks = expo.chunkPushNotifications(messages);
   let tickets = [];
   (async () => {
