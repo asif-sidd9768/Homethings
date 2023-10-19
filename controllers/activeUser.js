@@ -6,6 +6,7 @@ const schedule = require('node-schedule');
 
 // Function to send birthday notifications
 const sendBirthdayNotifications = async () => {
+  console.log("SCHEDULED THE JOB")
   const currentDate = new Date();
 
   // Find active users whose birthday is today
@@ -49,9 +50,9 @@ const sendBirthdayNotifications = async () => {
 }
 
 // Schedule the job to run daily at a specific time (e.g., midnight)
-const job = schedule.scheduleJob('0 0 * * *', sendBirthdayNotifications);
 
 activeUserRouter.get("/", async (req, res) => {
+  const job = schedule.scheduleJob('0 0 * * *', sendBirthdayNotifications);
   res.send("Server is ready to send birthday notifications.");
 });
 
