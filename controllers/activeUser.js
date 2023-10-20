@@ -61,7 +61,7 @@ activeUserRouter.post("/", async (req, res) => {
   res.send(activeUser);
 });
 
-module.exports = activeUserRouter;
+module.exports = sendBirthdayNotifications;
 
 // activeUserRouter.get("/", async(req, res) => {
 //   const activeUsers = await ActiveUser.find({}) 
