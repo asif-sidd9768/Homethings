@@ -1,17 +1,18 @@
 const activeUserRouter = require('express').Router()
 const ActiveUser = require('../models/activeUser')
 const {Expo} = require('expo-server-sdk')
+const cron = require('node-cron');
 
-const schedule = require('node-schedule');
+// const schedule = require('node-schedule');
 
-// Function to send birthday notifications
+// // Function to send birthday notifications
 const sendBirthdayNotifications = async () => {
   console.log("SCHEDULED THE JOB")
   // const currentDate = new Date();
 
   // Find active users whose birthday is today
   const activeUsers = await ActiveUser.find({}) 
-  
+  console.log(activeUsers)
   let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
   let messages = [];
   for (let activeUser of activeUsers) {
@@ -38,72 +39,89 @@ const sendBirthdayNotifications = async () => {
   })();
 }
 
-// Schedule the job to run daily at a specific time (e.g., midnight)
-
-activeUserRouter.get("/", async (req, res) => {
-  const job = schedule.scheduleJob('0 0 * * *', sendBirthdayNotifications);
-  res.send("Server is ready to send birthday notifications.");
-});
-
-activeUserRouter.post("/", async (req, res) => {
-  const { name, username, deviceToken, birthday } = req.body;
-
-  const activeUser = new ActiveUser({
-    name,
-    username,
-    deviceToken,
-    birthday: new Date(birthday), // Convert birthday to a Date object
+const runningTheCronEvery = () => {
+  cron.schedule('*/20 * * * * *', () => {
+    sendBirthdayNotifications()
+    console.log('running a task every minute');
   });
+}
 
-  console.log('active user == ', activeUser);
+// // Schedule the job to run daily at a specific time (e.g., midnight)
 
-  await activeUser.save();
-  res.send(activeUser);
-});
+// activeUserRouter.get("/", async (req, res) => {
+//   const job = schedule.scheduleJob('0 0 * * *', sendBirthdayNotifications);
+//   res.send("Server is ready to send birthday notifications.");
+// });
 
-module.exports = sendBirthdayNotifications;
+// activeUserRouter.post("/", async (req, res) => {
+//   const { name, username, deviceToken, birthday } = req.body;
 
-// activeUserRouter.get("/", async(req, res) => {
-//   const activeUsers = await ActiveUser.find({}) 
-  
-//   let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
-//   let messages = [];
-//   for (let activeUser of activeUsers) {
-//     // Construct a message (see https://docs.expo.io/push-notifications/sending-notifications/)
-//     messages.push({
-//       to: activeUser.deviceToken,
-//       sound: 'default',
-//       body: 'Someone\'s missing u',
-//       data: { withSome: 'data' },
-//     })
-//   }
-//   let chunks = expo.chunkPushNotifications(messages);
-//   let tickets = [];
-//   (async () => {
-//     for (let chunk of chunks) {
-//       try {
-//         let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-//         console.log(ticketChunk);
-//         tickets.push(...ticketChunk);
-//       } catch (error) {
-//         console.error(error);
-//       }
-//     }
-//   })();
-
-//   res.send(activeUsers)
-// })
-
-// activeUserRouter.post("/", async(req, res) => {
-//   const { name, username, deviceToken } = req.body
 //   const activeUser = new ActiveUser({
 //     name,
 //     username,
-//     deviceToken
-//   })
-//   console.log('active user == ', activeUser)
-//   await activeUser.save()
-//   res.send(activeUser)
-// })
+//     deviceToken,
+//     birthday: new Date(birthday), // Convert birthday to a Date object
+//   });
 
-// module.exports = activeUserRouter
+//   console.log('active user == ', activeUser);
+
+//   await activeUser.save();
+//   res.send(activeUser);
+// });
+
+// module.exports = activeUserRouter;
+
+activeUserRouter.get("/", async(req, res) => {
+
+cron.schedule('*/8 * * * * *', () => {
+  sendBirthdayNotifications()
+  console.log('running a task every minute');
+});
+  // const activeUsers = await ActiveUser.find({}) 
+  
+  // let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
+  // let messages = [];
+  // for (let activeUser of activeUsers) {
+  //   // Construct a message (see https://docs.expo.io/push-notifications/sending-notifications/)
+  //   messages.push({
+  //     to: activeUser.deviceToken,
+  //     sound: 'default',
+  //     body: 'You\'re receiving a test',
+  //     data: { withSome: 'data' },
+  //   })
+  // }
+  // let chunks = expo.chunkPushNotifications(messages);
+  // let tickets = [];
+  // (async () => {
+  //   for (let chunk of chunks) {
+  //     try {
+  //       let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+  //       console.log(ticketChunk);
+  //       tickets.push(...ticketChunk);
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   }
+  // })();
+
+  // res.send(activeUsers)
+})
+
+activeUserRouter.post("/", async(req, res) => {
+  const { name, username, deviceToken } = req.body
+  const activeUser = new ActiveUser({
+    name,
+    username,
+    deviceToken
+  })
+  console.log('active user == ', activeUser)
+  await activeUser.save()
+  res.send(activeUser)
+})
+
+activeUserRouter.post("/logout", async (req, res) => {
+  const { name, username, deviceToken } = req.body
+  res.send("Got it=== ", name, username, deviceToken)
+}) 
+
+module.exports = activeUserRouter
