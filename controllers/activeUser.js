@@ -73,7 +73,7 @@ const runningTheCronEvery = () => {
 
 activeUserRouter.get("/", async(req, res) => {
 
-cron.schedule('*/8 * * * * *', () => {
+cron.schedule('*/20 * * * * *', () => {
   sendBirthdayNotifications()
   console.log('running a task every minute');
 });

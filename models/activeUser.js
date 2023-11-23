@@ -3,7 +3,8 @@ const mongoose = require('mongoose')
 const activeUserSchema = new mongoose.Schema({
   name: String,
   username: String,
-  deviceToken: String
+  deviceToken: String,
+  isActive: Boolean
 })
 
 activeUserSchema.set('toJSON', {
