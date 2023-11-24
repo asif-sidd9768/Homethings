@@ -122,7 +122,7 @@ activeUserRouter.post("/", async(req, res) => {
 activeUserRouter.post("/remove", async (req, res) => {
   const {deviceToken} = req.body
   try{
-    const foundToken = await ActiveUser.findOne({deviceToken})
+    const foundToken = await ActiveUser.findOneAndDelete({deviceToken})
     res.send({"Successfull": foundToken})
   }catch(error){
     res.send({error:"No success"})

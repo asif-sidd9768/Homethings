@@ -16,7 +16,6 @@ eventsRouter.post('/', async (req, res) => {
   })
 
   await event.save()
-  console.log(event)
   res.send(event)
 })
 

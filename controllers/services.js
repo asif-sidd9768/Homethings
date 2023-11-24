@@ -31,7 +31,6 @@ servicesRouter.post('/', async(req, res) => {
     mobile
   })
 
-  console.log(service)
   await service.save()
   res.send(service)
 })
