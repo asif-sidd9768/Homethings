@@ -15,7 +15,7 @@ loginRouter.post('/', async(req, res) => {
   const user = await User.findOne({ username })
   const passwordCorrect = user === null
     ? false
-    : await bcrypt.compare(password, user.passwordHash)
+    : bcrypt.compare(password, user.passwordHash)
 
   if(!(user && passwordCorrect)){
     return res.status(401).json({
@@ -29,12 +29,6 @@ loginRouter.post('/', async(req, res) => {
   }
 
   const token = jwt.sign(userForToken, process.env.SECRET, { expiresIn: 60*60 })
-  const activeUser = new ActiveUser({
-    username,
-    deviceToken,
-    isActive: true
-  })
-  console.log(activeUser)
   res
     .status(200)
     .send({ token, username: user.username, name: user.name })
@@ -48,7 +42,7 @@ loginRouter.post('/change-password', async (req, res) => {
   const newPasswordHash = await bcrypt.hash(newPassword, saltRounds)
   user.passwordHash = newPasswordHash
   await user.save()
-  res.send("Password Successfully changed")
+  res.send("Password Successfullt")
 })
 
 module.exports = loginRouter
