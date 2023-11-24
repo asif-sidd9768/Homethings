@@ -119,6 +119,16 @@ activeUserRouter.post("/", async(req, res) => {
   res.send(activeUser)
 })
 
+activeUserRouter.post("/remove", async (req, res) => {
+  const {deviceToken} = req.body
+  try{
+    const foundToken = await ActiveUser.findOne({deviceToken})
+    res.send({"Successfull": foundToken})
+  }catch(error){
+    res.send({error:"No success"})
+  }
+})
+
 activeUserRouter.post("/logout", async (req, res) => {
   const { name, username, deviceToken } = req.body
   res.send("Got it=== ", name, username, deviceToken)
