@@ -14,7 +14,11 @@ const nGRouter = require('./controllers/nextGadget')
 const activeUserRouter = require('./controllers/activeUser')
 const ActiveUser = require('./models/activeUser')
 const {Expo} = require('expo-server-sdk')
-const { getUsersWithBirthdayInCurrentMonth } = require('./services/birthdayCheck')
+const { getUsersWithBirthdayInCurrentMonth, sendBirthdayNotifications, getUsersWithBirthdayTomorrow } = require('./services/birthdayCheck')
+const User = require('./models/user')
+const Vehicle = require('./models/vehicle')
+const Event = require('./models/event')
+const { getAllEvents } = require('./services/eventsFetch')
 // const runningTheCronEvery = require('./controllers/activeUser')
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   console.log('CONEECTED TO MONGOOSE === ')
@@ -40,70 +44,123 @@ app.use('/api/fun', funRouter)
 app.use('/api/nextGadget', nGRouter)
 app.use('/api/activeUser', activeUserRouter)
 
-const sendBirthdayNotifications = async (message) => {
-  console.log("SCHEDULED THE JOB")
-  // const currentDate = new Date();
-
-  // Find active users whose birthday is today
-  const activeUsers = await ActiveUser.find({}) 
-  console.log(activeUsers)
-  let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
-  let messages = [];
-  for (let activeUser of activeUsers) {
-    // Construct a message (see https://docs.expo.io/push-notifications/sending-notifications/)
-    messages.push({
-      to: activeUser.deviceToken,
-      sound: 'default',
-      body: message,
-      data: { withSome: 'data', icon:"./assets/icons/app-icon.png" },
-    })
-  }
-  let chunks = expo.chunkPushNotifications(messages);
-  let tickets = [];
-  (async () => {
-    for (let chunk of chunks) {
-      try {
-        let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-        console.log(ticketChunk);
-        tickets.push(...ticketChunk);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  })();
-}
 
 // cron.schedule('*/20 * * * * *', async () => {
-//   const bdays = await getUsersWithBirthdayInCurrentMonth()
-//   let message
+//   const bdays = await getUsersWithBirthdayTomorrow()
+//   let body
+//   const title = "Birthday"
 //   if(bdays.length > 1){
-//     message = `${bdays.length} people have birthday this month.`
+//     body = `${bdays.length} people have birthdays tomorrow.`
 //   }
 //   if(bdays.length  === 1){
-//     message = `${bdays[0].name} has a birthday this month.`
+//     body = `${bdays[0].name} has a birthday tomorrow.`
 //   }
-//   sendBirthdayNotifications(message)
+//   if(bdays.length < 1){
+//     body = "No birthdays this month"
+//   }
+//   sendBirthdayNotifications(title, body)
 //   console.log('running a task every 20 secs');
 // });
 
-// cron.schedule('0 0 1 * *', async () => {
-//   // sendBirthdayNotifications('5 people have a birthday this month');
-//   let message
-//   const bdays = await getUsersWithBirthdayInCurrentMonth()
-//   if(bdays.length > 1){
-//     message = `${bdays.length} people have birthday this month.`
-//   }
-//   if(bdays.length  === 1){
-//     message = `${bdays[0].name} has a birthday this month.`
-//   }
-//   sendBirthdayNotifications(message)
-//   console.log('Running a task on the 1st of every month');
-// });
+cron.schedule('0 0 1 * *', async () => {
+  let body
+  const title = "Birthday"
+  const bdays = await getUsersWithBirthdayInCurrentMonth()
+  if(bdays.length > 1){
+    body = `${bdays.length} people have birthdays this month.`
+  }
+  if(bdays.length  === 1){
+    body = `${bdays[0].name} has a birthday this month.`
+  }
+  if(bdays.length < 1){
+    body = "No birthdays this month"
+  }
+  sendBirthdayNotifications(title, body)
+  console.log('Running a task on the 1st of every month');
+});
 
-// cron.schedule('0 0 * * *', () => {
-//   // sendBirthdayNotifications('5 people have a birthday this month');
-//   console.log('Running a task every day at midnight');
-// });
+cron.schedule('0 0 * * *', async () => {
+  // sendBirthdayNotifications('5 people have a birthday this month');
+  const bdays = await getUsersWithBirthdayTomorrow()
+  let body
+  const title = "Birthday"
+  if(bdays.length > 1){
+    body = `${bdays.length} people have birthdays tomorrow.`
+  }
+  if(bdays.length  === 1){
+    body = `${bdays[0].name} has a birthday tomorrow.`
+  }
+  if(bdays.length < 1){
+    body = "No birthdays this month"
+  }
+  sendBirthdayNotifications(title, body)
+  console.log('Running a task every day at midnight');
+});
+
+
+// const getEventsWithinMonth = async (model, dayAttribute) => {
+//   const currentDate = new Date();
+//   const currentMonth = currentDate.getMonth() + 1;
+
+//   try {
+//     const events = await model.find({
+//       $expr: {
+//         $eq: [{ $month: `$${dayAttribute}` }, currentMonth],
+//       },
+//     });
+//     const formattedEvents = events.map(event => ({id: event.id, title: event.title || event.name, date: event[dayAttribute]}))
+//     return formattedEvents;
+//   } catch (error) {
+//     console.error(`Error retrieving events for ${model.modelName}:`, error);
+//     return [];
+//   }
+// };
+
+// const getVehicleEventsWithinMonth = async (model, dayAttribute) => {
+//   const currentDate = new Date();
+//   const currentMonth = currentDate.getMonth() + 1;
+//   try {
+//     const events = await model.find({
+//       $expr: {
+//         $or: [
+//           { $eq: [{ $month: "$warrantyData.insurance.endDate" }, currentMonth] },
+//           { $eq: [{ $month: "$warrantyData.Puc.endDate" }, currentMonth] },
+//           { $eq: [{ $month: "$warrantyData.services.lastServiceDate" }, currentMonth] },
+//         ],
+//       },
+//     }).lean();
+//     const fEvents = events.map(event => {
+//       let changedValues = {};
+//       if (new Date(event.warrantyData.insurance.endDate).getMonth()+1 === new Date(currentDate.getTime()).getMonth()+1) {
+//         changedValues[`reason`] = 'Insurance will expire soon';
+//         changedValues['date'] = event.warrantyData.insurance.endDate
+//       } else if (new Date(event.warrantyData.Puc.endDate).getMonth()+1 === new Date(currentDate.getTime()).getMonth()+1) {
+//         changedValues[`reason`] = 'Puc will expire soon';
+//         changedValues['date'] = event.warrantyData.Puc.endDate
+//       } else if (new Date(event.warrantyData.services.lastServiceDate).getMonth()+1 === new Date(currentDate.getTime()).getMonth()+1) {
+//         changedValues[`reason`] = 'Service will expire soon';
+//         changedValues['date'] = event.warrantyData.services.lastServiceDate
+//       }
+//       return { ...event, ...changedValues  };
+//     })
+    
+//     const formattedEvents = fEvents.map(event => {
+//       return ({id: event._id, title: event.title || event.name, date: event.date, reason: event.reason})
+//     })
+//     return formattedEvents;
+//   } catch (error) {
+//     console.error(`Error retrieving events for ${model.modelName}:`, error);
+//     return [];
+//   }
+// };
+
+// const test = async () => {
+//   const allEvents = await getAllEvents()
+//   console.log(allEvents)
+// }
+
+// test()
+
 
 // runningTheCronEvery()
 

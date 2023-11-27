@@ -7,11 +7,10 @@ const getUsersWithBirthdayInCurrentMonth = async () => {
   try {
     // Get the current month (1-indexed)
     const currentMonth = new Date().getMonth() + 1;
-
     // Query the database using Mongoose
     const usersInMonth = await User.find({
       $expr: {
-        $eq: [{ $month: '$birthDay' }, 4],
+        $eq: [{ $month: '$birthDay' }, currentMonth],
       },
     });
 
@@ -22,7 +21,41 @@ const getUsersWithBirthdayInCurrentMonth = async () => {
   }
 }
 
-const sendBirthdayNotifications = async (message) => {
+const getUsersWithBirthdayTomorrow = async () => {
+  try {
+    // Get the current date
+    const currentDate = new Date("12/30/2023");
+
+    // Get tomorrow's date
+    const tomorrow = new Date(currentDate);
+    tomorrow.setDate(currentDate.getDate() + 1);
+
+    // Extract tomorrow's month and day
+    const tomorrowMonth = tomorrow.getMonth() + 1; // Month is 0-indexed
+    const tomorrowDay = tomorrow.getDate();
+    // Query the database using Mongoose
+    const usersTomorrow = await User.find({
+      $expr: {
+        $or: [
+          {
+            $and: [
+              { $eq: [{ $month: '$birthDay' }, tomorrowMonth] },
+              { $eq: [{ $dayOfMonth: '$birthDay' }, tomorrowDay-1] },
+            ],
+          },
+        ],
+      },
+    })
+
+    return usersTomorrow;
+  } catch (error) {
+    console.error(error.message);
+    return [];
+  }
+};
+
+
+const sendBirthdayNotifications = async (title, body) => {
   console.log("SCHEDULED THE JOB")
   // const currentDate = new Date();
 
@@ -35,7 +68,8 @@ const sendBirthdayNotifications = async (message) => {
     messages.push({
       to: activeUser.deviceToken,
       sound: 'default',
-      body: message,
+      body,
+      title,
       data: { withSome: 'data' },
     })
   }
@@ -54,4 +88,4 @@ const sendBirthdayNotifications = async (message) => {
   })();
 }
 
-module.exports = {getUsersWithBirthdayInCurrentMonth, sendBirthdayNotifications}
+module.exports = {getUsersWithBirthdayInCurrentMonth, sendBirthdayNotifications, getUsersWithBirthdayTomorrow}
