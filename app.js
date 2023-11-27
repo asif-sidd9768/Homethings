@@ -73,37 +73,37 @@ const sendBirthdayNotifications = async (message) => {
   })();
 }
 
-cron.schedule('*/20 * * * * *', async () => {
-  const bdays = await getUsersWithBirthdayInCurrentMonth()
-  let message
-  if(bdays.length > 1){
-    message = `${bdays.length} people have birthday this month.`
-  }
-  if(bdays.length  === 1){
-    message = `${bdays[0].name} has a birthday this month.`
-  }
-  sendBirthdayNotifications(message)
-  console.log('running a task every 20 secs');
-});
+// cron.schedule('*/20 * * * * *', async () => {
+//   const bdays = await getUsersWithBirthdayInCurrentMonth()
+//   let message
+//   if(bdays.length > 1){
+//     message = `${bdays.length} people have birthday this month.`
+//   }
+//   if(bdays.length  === 1){
+//     message = `${bdays[0].name} has a birthday this month.`
+//   }
+//   sendBirthdayNotifications(message)
+//   console.log('running a task every 20 secs');
+// });
 
-cron.schedule('0 0 1 * *', async () => {
-  // sendBirthdayNotifications('5 people have a birthday this month');
-  let message
-  const bdays = await getUsersWithBirthdayInCurrentMonth()
-  if(bdays.length > 1){
-    message = `${bdays.length} people have birthday this month.`
-  }
-  if(bdays.length  === 1){
-    message = `${bdays[0].name} has a birthday this month.`
-  }
-  sendBirthdayNotifications(message)
-  console.log('Running a task on the 1st of every month');
-});
+// cron.schedule('0 0 1 * *', async () => {
+//   // sendBirthdayNotifications('5 people have a birthday this month');
+//   let message
+//   const bdays = await getUsersWithBirthdayInCurrentMonth()
+//   if(bdays.length > 1){
+//     message = `${bdays.length} people have birthday this month.`
+//   }
+//   if(bdays.length  === 1){
+//     message = `${bdays[0].name} has a birthday this month.`
+//   }
+//   sendBirthdayNotifications(message)
+//   console.log('Running a task on the 1st of every month');
+// });
 
-cron.schedule('0 0 * * *', () => {
-  // sendBirthdayNotifications('5 people have a birthday this month');
-  console.log('Running a task every day at midnight');
-});
+// cron.schedule('0 0 * * *', () => {
+//   // sendBirthdayNotifications('5 people have a birthday this month');
+//   console.log('Running a task every day at midnight');
+// });
 
 // runningTheCronEvery()
 
