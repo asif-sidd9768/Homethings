@@ -2,11 +2,12 @@ const activeUserRouter = require('express').Router()
 const ActiveUser = require('../models/activeUser')
 const {Expo} = require('expo-server-sdk')
 const cron = require('node-cron');
+const User = require('../models/user');
 
 // const schedule = require('node-schedule');
 
 // // Function to send birthday notifications
-const sendBirthdayNotifications = async () => {
+const sendBirthdayNotifications = async (message) => {
   console.log("SCHEDULED THE JOB")
   // const currentDate = new Date();
 
@@ -20,7 +21,7 @@ const sendBirthdayNotifications = async () => {
     messages.push({
       to: activeUser.deviceToken,
       sound: 'default',
-      body: 'Someone\'s missing u',
+      body: message,
       data: { withSome: 'data' },
     })
   }
@@ -46,65 +47,38 @@ const runningTheCronEvery = () => {
   });
 }
 
-// // Schedule the job to run daily at a specific time (e.g., midnight)
+async function getUsersWithBirthdayInCurrentMonth() {
+  try {
+    // Get the current month (1-indexed)
+    const currentMonth = new Date().getMonth() + 1;
 
-// activeUserRouter.get("/", async (req, res) => {
-//   const job = schedule.scheduleJob('0 0 * * *', sendBirthdayNotifications);
-//   res.send("Server is ready to send birthday notifications.");
-// });
+    // Query the database using Mongoose
+    const usersInMonth = await User.find({
+      $expr: {
+        $eq: [{ $month: '$birthDay' }, 12],
+      },
+    });
 
-// activeUserRouter.post("/", async (req, res) => {
-//   const { name, username, deviceToken, birthday } = req.body;
+    return usersInMonth;
+  } catch (error) {
+    console.error(error.message);
+    return [];
+  }
+}
 
-//   const activeUser = new ActiveUser({
-//     name,
-//     username,
-//     deviceToken,
-//     birthday: new Date(birthday), // Convert birthday to a Date object
-//   });
-
-//   console.log('active user == ', activeUser);
-
-//   await activeUser.save();
-//   res.send(activeUser);
-// });
-
-// module.exports = activeUserRouter;
 
 activeUserRouter.get("/", async(req, res) => {
 
-cron.schedule('*/20 * * * * *', () => {
-  sendBirthdayNotifications()
-  console.log('running a task every minute');
-});
-  // const activeUsers = await ActiveUser.find({}) 
-  
-  // let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
-  // let messages = [];
-  // for (let activeUser of activeUsers) {
-  //   // Construct a message (see https://docs.expo.io/push-notifications/sending-notifications/)
-  //   messages.push({
-  //     to: activeUser.deviceToken,
-  //     sound: 'default',
-  //     body: 'You\'re receiving a test',
-  //     data: { withSome: 'data' },
-  //   })
+  const usersB = await getUsersWithBirthdayInCurrentMonth()
+  // if(usersB.length > 1){
+  //   return res.status(200).json({data: usersB.count})
   // }
-  // let chunks = expo.chunkPushNotifications(messages);
-  // let tickets = [];
-  // (async () => {
-  //   for (let chunk of chunks) {
-  //     try {
-  //       let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-  //       console.log(ticketChunk);
-  //       tickets.push(...ticketChunk);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   }
-  // })();
-
-  // res.send(activeUsers)
+  // console.log(usersB)
+  // res.send(usersB)
+  cron.schedule('*/20 * * * * *', () => {
+    sendBirthdayNotifications(`${usersB.length} people have birthday this month`)
+    console.log('running a task every minute');
+  });
 })
 
 activeUserRouter.post("/", async(req, res) => {
