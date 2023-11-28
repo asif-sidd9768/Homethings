@@ -23,40 +23,64 @@ const getEventsWithinMonth = async (model, dayAttribute) => {
 const getVehicleEventsWithinMonth = async (model, dayAttribute) => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear()
   try {
-    const events = await model.find({
+    const insuranceEvents = await model.find({
       $expr: {
-        $or: [
+        $and: [
+          { $gte: ["$warrantyData.insurance.endDate", new Date()] },
           { $eq: [{ $month: "$warrantyData.insurance.endDate" }, currentMonth] },
-          { $eq: [{ $month: "$warrantyData.Puc.endDate" }, currentMonth] },
-          { $eq: [{ $month: "$warrantyData.services.lastServiceDate" }, currentMonth] },
-        ],
-      },
-    }).lean();
-    const fEvents = events.map(event => {
-      let changedValues = {};
-      if (new Date(event.warrantyData.insurance.endDate).getMonth()+1 === new Date(currentDate.getTime()).getMonth()+1) {
-        changedValues[`reason`] = 'Insurance will expire soon';
-        changedValues['date'] = event.warrantyData.insurance.endDate
-      } else if (new Date(event.warrantyData.Puc.endDate).getMonth()+1 === new Date(currentDate.getTime()).getMonth()+1) {
-        changedValues[`reason`] = 'Puc will expire soon';
-        changedValues['date'] = event.warrantyData.Puc.endDate
-      } else if (new Date(event.warrantyData.services.lastServiceDate).getMonth()+1 === new Date(currentDate.getTime()).getMonth()+1) {
-        changedValues[`reason`] = 'Service will expire soon';
-        changedValues['date'] = event.warrantyData.services.lastServiceDate
+          { $eq: [{ $year: "$warrantyData.insurance.endDate" }, currentYear] }
+        ]
       }
-      return { ...event, ...changedValues  };
-    })
+    }).lean();
+    const pucEvents = await model.find({
+      $expr: {
+        $and: [
+          { $gte: ["$warrantyData.Puc.endDate", new Date()] },
+          { $eq: [{ $month: "$warrantyData.Puc.endDate" }, currentMonth] },
+          { $eq: [{ $year: "$warrantyData.Puc.endDate" }, currentYear] }
+        ]
+      }
+    }).lean();
+    const lastServiceEvents = await model.find({
+      $expr: {
+        $and: [
+          { $gte: ["$warrantyData.services.lastServiceDate", new Date()] },
+          { $eq: [{ $month: "$warrantyData.services.lastServiceDate" }, currentMonth] },
+          { $eq: [{ $year: "$warrantyData.services.lastServiceDate" }, currentYear] }
+        ]
+      }
+    }).lean();
+
+    const formattedInsuranceEvents = formatEventsData(insuranceEvents, "Insurance")
+    const formattedPucEvents = formatEventsData(pucEvents, "Puc")
+    const formattedServiceEvents = formatEventsData(lastServiceEvents, "Service")
+    const allVehicleEvents = formattedInsuranceEvents.concat(formattedPucEvents, formattedServiceEvents)
     
-    const formattedEvents = fEvents.map(event => {
-      return ({id: event._id, title: event.title || event.name, date: event.date, reason: event.reason})
-    })
-    return formattedEvents;
+    return allVehicleEvents;
   } catch (error) {
     console.error(`Error retrieving events for ${model.modelName}:`, error);
     return [];
   }
 };
+
+const formatEventsData = (events, type) => {
+  const formattedEvents = events.map(event => {
+    if (type === "Insurance") {
+      return  extractEventData(event, `${type} will expire soon`, event.warrantyData.insurance.endDate)
+    } else if (type === "Puc") {
+      return  extractEventData(event, `${type} will expire soon`, event.warrantyData.Puc.endDate)
+    } else {
+      return  extractEventData(event, `${type} will expire soon`, event.warrantyData.services.lastServiceDate)
+    }
+  })
+  return formattedEvents
+}
+
+const extractEventData = (event, reason, date) => {
+  return ({id: event._id, title: event.title||event.name, reason, date })
+}
 
 const getAllEvents =  async () => {
   const usersWithinWeek = await getEventsWithinMonth(User, 'birthDay');
