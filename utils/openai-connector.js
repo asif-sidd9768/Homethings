@@ -10,7 +10,7 @@ const generate = async (input) => {
     model: "text-davinci-003",
     prompt: input,
     temperature: 0.4,
-    max_tokens: 1024
+    max_tokens: 256
     });
     return response.data.choices[0].text
   }catch(e){

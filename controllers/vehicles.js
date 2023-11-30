@@ -4,12 +4,13 @@ const User = require('../models/user')
 const { vehicleCategorize } = require('../utils/vehicleCategorize')
 
 vehiclesRouter.get('/', async (req, res) => {
-  const data = await Vehicle.find({})
-  const data1 = await Vehicle.find({}).select("-_id -__v").exec((err, data) => {
-
-  })
-  const vehicles = vehicleCategorize(data)
-  res.status(201).json(vehicles)
+  try{
+    const data = await Vehicle.find({})
+    const vehicles = vehicleCategorize(data)
+    res.status(201).json(vehicles)
+  }catch(error){
+    res.status(500).send("Failed to get the vehicles")
+  }
 })
 
 vehiclesRouter.post('/', async (req, res) => {
