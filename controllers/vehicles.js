@@ -35,8 +35,9 @@ vehiclesRouter.post("/edit/:vehicleId", async (req, res) => {
     const newVehicledata = req.body
     console.log(newVehicledata)
     console.log(vehicleId)
-    const foundVehicle = await Vehicle.findByIdAndUpdate(vehicleId, newVehicledata,{new: true})
-    res.send(foundVehicle)
+    await Vehicle.findByIdAndUpdate(vehicleId, newVehicledata,{new: true})
+    const allVehicles = await Vehicle.find({})
+    res.send(allVehicles)
   }catch(e){
     res.status(500).send("Failed to update vehicle")
   }
