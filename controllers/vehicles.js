@@ -1,17 +1,14 @@
 const vehiclesRouter = require('express').Router()
 const Vehicle = require('../models/vehicle')
 const User = require('../models/user')
+const { vehicleCategorize } = require('../utils/vehicleCategorize')
 
 vehiclesRouter.get('/', async (req, res) => {
   const data = await Vehicle.find({})
   const data1 = await Vehicle.find({}).select("-_id -__v").exec((err, data) => {
 
   })
-  let vehicles = {
-    cars: [],
-    bikes: []
-  }
-  data.map(vehicle => vehicle.type == "car" ? vehicles.cars.push(vehicle) : vehicles.bikes.push(vehicle))
+  const vehicles = vehicleCategorize(data)
   res.status(201).json(vehicles)
 })
 
@@ -37,7 +34,8 @@ vehiclesRouter.post("/edit/:vehicleId", async (req, res) => {
     console.log(vehicleId)
     await Vehicle.findByIdAndUpdate(vehicleId, newVehicledata,{new: true})
     const allVehicles = await Vehicle.find({})
-    res.send(allVehicles)
+    const categorizeVehicles = vehicleCategorize(allVehicles)
+    res.send(categorizeVehicles)
   }catch(e){
     res.status(500).send("Failed to update vehicle")
   }
