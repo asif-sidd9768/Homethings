@@ -29,4 +29,17 @@ vehiclesRouter.post('/', async (req, res) => {
   res.status(201).json(vehicle)
 })
 
+vehiclesRouter.post("/edit/:vehicleId", async (req, res) => {
+  try{
+    const {vehicleId} = req.params
+    const newVehicledata = req.body
+    console.log(newVehicledata)
+    console.log(vehicleId)
+    const foundVehicle = await Vehicle.findByIdAndUpdate(vehicleId, newVehicledata,{new: true})
+    res.send(foundVehicle)
+  }catch(e){
+    res.status(500).send("Failed to update vehicle")
+  }
+})
+
 module.exports = vehiclesRouter

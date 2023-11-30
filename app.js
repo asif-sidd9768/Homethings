@@ -44,24 +44,6 @@ app.use('/api/fun', funRouter)
 app.use('/api/nextGadget', nGRouter)
 app.use('/api/activeUser', activeUserRouter)
 
-
-// cron.schedule('*/20 * * * * *', async () => {
-//   const bdays = await getUsersWithBirthdayTomorrow()
-//   let body
-//   const title = "Birthday"
-//   if(bdays.length > 1){
-//     body = `${bdays.length} people have birthdays tomorrow.`
-//   }
-//   if(bdays.length  === 1){
-//     body = `${bdays[0].name} has a birthday tomorrow.`
-//   }
-//   if(bdays.length < 1){
-//     body = "No birthdays this month"
-//   }
-//   sendBirthdayNotifications(title, body)
-//   console.log('running a task every 20 secs');
-// });
-
 cron.schedule('0 0 1 * *', async () => {
   let body
   const title = "Birthday"
